@@ -25,6 +25,20 @@ Sistema full stack según el examen de Tap Terminal:
 
 - Docker Desktop (recomendado), o PHP 8.2 + Composer + MongoDB + Node 22
 
+## Instalación en Windows (sin Docker)
+
+Con **winget** (PowerShell como administrador opcional):
+
+```powershell
+winget install PHP.PHP.8.2 MongoDB.Server
+```
+
+Luego instala Composer y la extensión MongoDB para PHP (ver `scripts/setup-windows.ps1`) o sigue manualmente:
+
+1. Cierra y abre una terminal nueva para refrescar el PATH.
+2. Ejecuta `scripts/setup-windows.ps1` desde la raíz del proyecto.
+3. Sigue los pasos de **Ejecución local** más abajo.
+
 ## Ejecución con Docker
 
 1. Iniciar Docker Desktop.
