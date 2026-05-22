@@ -12,4 +12,11 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
     protected $connection = 'mongodb';
 
     protected $collection = 'personal_access_tokens';
+
+    protected $primaryKey = '_id';
+
+    /** MongoDB ObjectId strings; Sanctum valida el prefijo del token según keyType. */
+    protected $keyType = 'string';
+
+    public $incrementing = false;
 }

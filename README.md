@@ -86,7 +86,26 @@ npm start
 
 ## Documentación API
 
-Colección Postman en `postman/TapTerminal.postman_collection.json`.
+### Swagger UI
+
+Con el backend en marcha, abre:
+
+**http://localhost:8000/api/documentation**
+
+1. Ejecuta `POST /auth/login` y copia el `token`.
+2. Pulsa **Authorize** e ingresa: `Bearer {tu_token}`.
+3. Prueba el resto de endpoints.
+
+Regenerar documentación:
+
+```bash
+cd backend
+php artisan l5-swagger:generate
+```
+
+### Postman
+
+Colección en `postman/TapTerminal.postman_collection.json`.
 
 ## Criterios del examen cubiertos
 

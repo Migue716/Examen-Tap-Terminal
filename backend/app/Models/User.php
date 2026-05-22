@@ -2,12 +2,42 @@
 
 namespace App\Models;
 
+use DateTimeInterface;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\NewAccessToken;
 use MongoDB\Laravel\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
     use HasApiTokens;
+
+    /**
+     * Sanctum concatena id|token; MongoDB no hidrata _id al insertar vía morphMany.
+     */
+    public function createToken(string $name, array $abilities = ['*'], ?DateTimeInterface $expiresAt = null)
+    {
+        $plainTextToken = $this->generateTokenString();
+        $hashedToken = hash('sha256', $plainTextToken);
+
+        $this->tokens()->create([
+            'name' => $name,
+            'token' => $hashedToken,
+            'abilities' => $abilities,
+            'expires_at' => $expiresAt,
+        ]);
+
+        $accessToken = $this->tokens()
+            ->where('name', $name)
+            ->where('token', $hashedToken)
+            ->orderByDesc('created_at')
+            ->first();
+
+        if (! $accessToken?->getKey()) {
+            throw new \RuntimeException('No se pudo crear el token de acceso.');
+        }
+
+        return new NewAccessToken($accessToken, $accessToken->getKey().'|'.$plainTextToken);
+    }
 
     protected $connection = 'mongodb';
 
