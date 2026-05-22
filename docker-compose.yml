@@ -1,10 +1,27 @@
 services:
   mongodb:
     image: mongo:7
+    # 27018 en el host: evita conflicto con MongoDB instalado en Windows (puerto 27017)
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - mongodb_data:/data/db
+    networks:
+      default:
+        aliases:
+          - mongo
+
+  mongo-express:
+    image: mongo-express:latest
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: tapterminal
+    depends_on:
+      - mongodb
 
   mailpit:
     image: axllent/mailpit:latest

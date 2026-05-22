@@ -29,12 +29,15 @@ flowchart TB
         FE["Frontend<br/>Angular 19 · Node 22<br/>:4200"]
         BE["Backend<br/>Laravel 11 · PHP 8.2<br/>:8000"]
         DB[(MongoDB 7<br/>:27017)]
+        MEX["Mongo Express<br/>:8081"]
     end
 
     Browser --> FE
+    Browser --> MEX
     Swagger --> BE
     Postman --> BE
     FE -->|"REST JSON<br/>Bearer token"| BE
+    MEX -->|"MongoDB driver"| DB
     BE -->|"MongoDB driver"| DB
 ```
 
@@ -44,7 +47,8 @@ flowchart TB
 |------------|--------|-----|
 | Angular (frontend) | 4200 | SPA, UI, guards, interceptor Bearer |
 | Laravel (backend) | 8000 | API REST, Sanctum, RBAC, exportaciones |
-| MongoDB | 27017 | Persistencia en documentos |
+| MongoDB (Docker) | **27018** en el host (27017 en la red Docker) | Persistencia en documentos |
+| Mongo Express | 8081 | UI web para explorar la base de datos |
 | Swagger | 8000 | Documentación y pruebas de API |
 
 ---

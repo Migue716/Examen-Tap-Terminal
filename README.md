@@ -34,6 +34,21 @@ docker compose exec backend php artisan db:seed --force
 
 O usa la contraseña temporal en Mailpit: http://localhost:8025
 
+### Compass muestra otra base (Mongo “local” en vez de Docker)
+
+Si tienes **MongoDB instalado en Windows**, usa el puerto **27017** y Compass se conecta a ese, no al de Docker.
+
+El proyecto publica Mongo de Docker en el puerto **27018**:
+
+```
+mongodb://127.0.0.1:27018/tapterminal
+```
+
+En Compass: host `127.0.0.1`, puerto **27018**.  
+Mongo Express (http://localhost:8081) siempre apunta al contenedor correcto.
+
+Alternativa: detener el servicio local `MongoDB Server` en Windows y usar solo Docker.
+
 ## Requisitos
 
 - Docker Desktop (recomendado), o PHP 8.2 + Composer + MongoDB + Node 22
@@ -75,6 +90,7 @@ docker compose exec backend php artisan db:seed
 - Frontend: http://localhost:4200
 - API: http://localhost:8000
 - **Mailpit** (correos de recuperar contraseña): http://localhost:8025
+- **Mongo Express** (UI web de MongoDB): http://localhost:8081 — usuario `admin` / contraseña `tapterminal`
 
 ### Correo no llega a Mailpit
 
