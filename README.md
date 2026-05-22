@@ -8,6 +8,8 @@ Sistema full stack según el examen de Tap Terminal:
 - **Exportaciones:** PDF (DomPDF) y Excel (Maatwebsite)
 - **Bitácora:** colección `audit_logs` con datos anteriores y actuales
 
+Ver **[ARCHITECTURE.md](./ARCHITECTURE.md)** para diagramas de despliegue, capas, autenticación y modelo de datos.
+
 ## Módulos
 
 | Módulo    | Consulta | Alta/Edición/Eliminación | Export PDF/Excel |
