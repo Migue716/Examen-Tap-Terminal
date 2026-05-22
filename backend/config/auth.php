@@ -13,7 +13,7 @@ return [
     ],
     'providers' => [
         'users' => [
-            'driver' => 'mongodb',
+            'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
     ],
