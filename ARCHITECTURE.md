@@ -10,8 +10,24 @@ Documentación de la arquitectura del sistema full stack del examen de admisión
 | API | Laravel 11, PHP 8.2 |
 | Autenticación | Laravel Sanctum (Bearer token) |
 | Base de datos | MongoDB 7 |
+| Correo (desarrollo) | Mailpit (SMTP + UI web) |
+| Explorador DB (desarrollo) | Mongo Express |
 | Exportaciones | DomPDF (PDF), Maatwebsite Excel |
-| Contenedores | Docker Compose (frontend, backend, mongodb) |
+| Contenedores | Docker Compose |
+
+---
+
+## Servicios Docker Compose
+
+| Servicio | Imagen | Puerto(s) host | Función |
+|----------|--------|------------------|---------|
+| `frontend` | node:22 | 4200 | SPA Angular |
+| `backend` | build `./backend` | 8000 | API Laravel + Swagger |
+| `mongodb` | mongo:7 | **27018** → 27017 | Base de datos del proyecto |
+| `mongo-express` | mongo-express | 8081 | UI web de MongoDB |
+| `mailpit` | axllent/mailpit | 8025 (UI), 1025 (SMTP) | Correos de desarrollo |
+
+Volumen persistente: `mongodb_data` (datos de MongoDB).
 
 ---
 
@@ -19,37 +35,60 @@ Documentación de la arquitectura del sistema full stack del examen de admisión
 
 ```mermaid
 flowchart TB
-    subgraph Cliente["Cliente"]
-        Browser["Navegador<br/>:4200"]
-        Swagger["Swagger UI<br/>:8000/api/documentation"]
-        Postman["Postman / cURL"]
+    subgraph Cliente["Cliente (navegador / herramientas)"]
+        Browser["Angular<br/>:4200"]
+        Swagger["Swagger<br/>:8000/api/documentation"]
+        MEX_UI["Mongo Express<br/>:8081"]
+        Mail_UI["Mailpit<br/>:8025"]
+        Compass["Compass / mongosh<br/>:27018"]
     end
 
-    subgraph Docker["Docker Compose"]
-        FE["Frontend<br/>Angular 19 · Node 22<br/>:4200"]
-        BE["Backend<br/>Laravel 11 · PHP 8.2<br/>:8000"]
-        DB[(MongoDB 7<br/>:27017)]
-        MEX["Mongo Express<br/>:8081"]
+    subgraph Docker["Docker Compose — red interna"]
+        FE["frontend"]
+        BE["backend<br/>Laravel 11"]
+        DB[(mongodb<br/>alias: mongo)]
+        MEX["mongo-express"]
+        MP["mailpit"]
     end
 
     Browser --> FE
-    Browser --> MEX
     Swagger --> BE
-    Postman --> BE
-    FE -->|"REST JSON<br/>Bearer token"| BE
-    MEX -->|"MongoDB driver"| DB
-    BE -->|"MongoDB driver"| DB
+    MEX_UI --> MEX
+    Mail_UI --> MP
+    Compass -->|"127.0.0.1:27018"| DB
+    FE -->|"REST + Bearer"| BE
+    BE -->|"mongodb://mongodb:27017"| DB
+    BE -->|"SMTP :1025"| MP
+    MEX -->|"mongodb://mongo:27017"| DB
 ```
 
-### Puertos
+### Puertos y URLs
 
-| Componente | Puerto | Rol |
-|------------|--------|-----|
-| Angular (frontend) | 4200 | SPA, UI, guards, interceptor Bearer |
-| Laravel (backend) | 8000 | API REST, Sanctum, RBAC, exportaciones |
-| MongoDB (Docker) | **27018** en el host (27017 en la red Docker) | Persistencia en documentos |
-| Mongo Express | 8081 | UI web para explorar la base de datos |
-| Swagger | 8000 | Documentación y pruebas de API |
+| Componente | URL / conexión | Rol |
+|------------|----------------|-----|
+| Frontend | http://localhost:4200 | Panel de administración |
+| API + Swagger | http://localhost:8000 · http://localhost:8000/api/documentation | REST y documentación |
+| MongoDB (desde el PC) | `mongodb://127.0.0.1:27018/tapterminal` | Compass, scripts locales |
+| MongoDB (desde contenedores) | `mongodb://mongodb:27017` o `mongodb://mongo:27017` | Backend, Mongo Express |
+| Mongo Express | http://localhost:8081 — `admin` / `tapterminal` | Explorar colecciones en el navegador |
+| Mailpit | http://localhost:8025 | Ver correos de recuperar contraseña |
+
+> **Puerto 27018:** Mongo de Docker se publica en **27018** en el host para no chocar con MongoDB instalado en Windows, que suele usar **27017** en `127.0.0.1`.
+
+---
+
+## Acceso a MongoDB (Docker vs local)
+
+En muchos equipos coexisten dos instancias:
+
+| Instancia | Cómo detectarla | Conexión desde Compass |
+|-----------|-----------------|------------------------|
+| MongoDB de **Windows** | Servicio `mongod.exe`, puerto `127.0.0.1:27017` | `mongodb://127.0.0.1:27017` — **no** es la del proyecto |
+| MongoDB de **Docker** | `docker compose ps mongodb` | `mongodb://127.0.0.1:27018/tapterminal` |
+
+**Mongo Express** siempre usa la red Docker (`mongo:27017`), por eso en http://localhost:8081/db/tapterminal ves los datos correctos aunque Compass en 27017 muestre otra cosa.
+
+Base de datos del proyecto: **`tapterminal`**.
 
 ---
 
@@ -60,6 +99,7 @@ flowchart LR
     subgraph Presentación
         UI["Angular Material<br/>Login · Shell · CRUD"]
         INT["HTTP Interceptor<br/>+ Auth Guard"]
+        TH["ThemeService<br/>modo claro/oscuro"]
     end
 
     subgraph API["API REST /api"]
@@ -72,6 +112,7 @@ flowchart LR
 
     subgraph Dominio
         SVC["Services<br/>CodeGenerator · AuditLog"]
+        MAIL["PasswordResetMail<br/>plantilla HTML"]
         MDL["Models<br/>User · Profile · Section · Product"]
     end
 
@@ -82,7 +123,9 @@ flowchart LR
     end
 
     UI --> INT --> API
+    UI --> TH
     AUTH --> MW1
+    AUTH --> MAIL
     CRUD --> MW1 --> MW2
     MW2 --> SVC --> MDL --> MONGO
     AUTH --> TOK
@@ -100,25 +143,36 @@ sequenceDiagram
     participant A as Angular
     participant L as Laravel API
     participant M as MongoDB
+    participant P as Mailpit
 
     U->>A: Correo + contraseña
     A->>L: POST /api/auth/login
-    L->>M: Buscar user + verificar Hash
-    M-->>L: Usuario + perfiles/secciones
+    L->>M: Buscar user + Hash::check
     L->>M: Crear token Sanctum
     L-->>A: token + user (sections, write_sections)
     A->>A: localStorage tap_token
 
-    Note over A,L: Peticiones protegidas
-    A->>L: GET/POST ... Authorization: Bearer {token}
-    L->>M: Validar token + cargar usuario
-    L-->>A: JSON respuesta
+    Note over A,L: Rutas protegidas
+    A->>L: Authorization Bearer {token}
+    L->>M: Validar token
+    L-->>A: JSON
 
     U->>A: Recuperar contraseña
     A->>L: POST /api/auth/forgot-password
-    L->>M: Nueva contraseña temporal
-    L->>L: Enviar correo (Mail log/SMTP)
+    L->>M: Contraseña temporal (Hash)
+    L->>P: PasswordResetMail (HTML + texto)
+    L-->>A: Mensaje de éxito
+    U->>P: Revisar correo en :8025
 ```
+
+### Recuperación de contraseña
+
+1. Genera contraseña temporal (`Str::password`).
+2. La guarda cifrada en `users`.
+3. Envía `PasswordResetMail` (vista `emails/password-reset.blade.php`).
+4. En Docker el SMTP apunta a **mailpit** (`MAIL_HOST=mailpit`, puerto `1025`).
+
+Tras usar recuperar contraseña, el seed deja de coincidir con la clave anterior; restaurar con `php artisan db:seed` o leer la clave en Mailpit.
 
 ---
 
@@ -173,8 +227,8 @@ erDiagram
 | `profiles` | Roles y permisos por sección |
 | `sections` | Módulos (`productos`, `usuarios`, `perfiles`) y lectura/escritura |
 | `products` | Catálogo de productos |
-| `personal_access_tokens` | Tokens Sanctum |
-| `audit_logs` | Bitácora create/update/delete |
+| `personal_access_tokens` | Tokens Sanctum (MongoDB `_id` como string) |
+| `audit_logs` | Bitácora create / update / delete |
 | `counters` | Secuencias para códigos automáticos (PRD, USR, PFL) |
 
 ---
@@ -204,7 +258,7 @@ flowchart TB
     PF --> API_F["/api/profiles<br/>+ export pdf|excel"]
 ```
 
-El middleware `section` valida que el usuario tenga acceso al módulo solicitado. Las rutas con sufijo `,write` exigen sección con `can_write: true` (o ser administrador).
+El middleware `section` valida acceso al módulo. Las rutas con sufijo `,write` exigen sección con `can_write: true` o ser administrador.
 
 ---
 
@@ -212,23 +266,27 @@ El middleware `section` valida que el usuario tenga acceso al módulo solicitado
 
 ```
 Examen Tap Terminal/
-├── frontend/                 # Angular 19
+├── frontend/                      # Angular 19
 │   └── src/app/
-│       ├── auth/             # Login, recuperar contraseña
-│       ├── core/             # AuthService, interceptor, guards, API
-│       ├── layout/           # Shell (sidebar + topbar)
+│       ├── auth/                  # Login, recuperar contraseña
+│       ├── core/                  # AuthService, interceptor, guards, theme
+│       ├── layout/                # Shell (sidebar + topbar)
 │       ├── products/
 │       ├── users/
 │       └── profiles/
-├── backend/                  # Laravel 11 API
+├── backend/                       # Laravel 11 API
 │   ├── app/
 │   │   ├── Http/Controllers/Api/
-│   │   ├── Http/Middleware/  # CheckSectionAccess
+│   │   ├── Http/Middleware/       # CheckSectionAccess
+│   │   ├── Mail/                  # PasswordResetMail
 │   │   ├── Models/
-│   │   └── Services/         # AuditLog, CodeGenerator
+│   │   └── Services/              # AuditLog, CodeGenerator
+│   ├── config/mail.php
+│   ├── resources/views/emails/    # password-reset (HTML + texto)
 │   ├── database/seeders/
 │   └── routes/api.php
-├── docker-compose.yml
+├── docker-compose.yml             # mongodb, mongo-express, mailpit, backend, frontend
+├── ARCHITECTURE.md                # Este documento
 ├── postman/
 └── README.md
 ```
@@ -240,9 +298,10 @@ Examen Tap Terminal/
 | Método | Ruta | Auth | Descripción |
 |--------|------|------|-------------|
 | POST | `/api/auth/login` | No | Iniciar sesión |
-| POST | `/api/auth/forgot-password` | No | Recuperar contraseña |
+| POST | `/api/auth/forgot-password` | No | Recuperar contraseña (correo HTML) |
 | POST | `/api/auth/logout` | Sí | Cerrar sesión |
 | GET | `/api/auth/me` | Sí | Usuario actual |
+| GET | `/api/sections` | Sí | Listar secciones |
 | GET/POST/PUT/DELETE | `/api/products` | Sí + sección | CRUD productos |
 | GET/POST/PUT/DELETE | `/api/users` | Sí + sección | CRUD usuarios |
 | GET/POST/PUT/DELETE | `/api/profiles` | Sí + sección | CRUD perfiles |
@@ -250,24 +309,46 @@ Examen Tap Terminal/
 
 ---
 
+## Variables de entorno relevantes (backend)
+
+| Variable | Docker Compose | Uso |
+|----------|------------------|-----|
+| `MONGODB_URI` | `mongodb://mongodb:27017` | Conexión desde el contenedor backend |
+| `MONGODB_DATABASE` | `tapterminal` | Nombre de la base |
+| `FRONTEND_URL` | `http://localhost:4200` | Enlace en correo de recuperación |
+| `MAIL_MAILER` | `smtp` | Envío real a Mailpit |
+| `MAIL_HOST` | `mailpit` | Host SMTP en red Docker |
+| `MAIL_PORT` | `1025` | Puerto SMTP Mailpit |
+
+Desde el host (Compass, `php artisan` local): `MONGODB_URI=mongodb://127.0.0.1:27018`.
+
+---
+
 ## Diagrama ASCII (resumen)
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  Angular 19 + Material + TypeScript                     │
-│  · AuthService / Guards / Interceptor                   │
-│  · Módulos: Productos, Usuarios, Perfiles               │
-└──────────────────────────┬──────────────────────────────┘
-                           │ HTTP JSON (Bearer)
-┌──────────────────────────▼──────────────────────────────┐
-│  Laravel 11 API                                         │
-│  · Sanctum (Bearer)                                     │
-│  · Middleware section (RBAC)                            │
-│  · DomPDF + Maatwebsite Excel                           │
-│  · Bitácora audit_logs                                  │
-└──────────────────────────┬──────────────────────────────┘
-                           │
-┌──────────────────────────▼──────────────────────────────┐
-│  MongoDB (users, products, profiles, sections, …)     │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│  Angular 19 · :4200                                      │
+│  Auth · RBAC en UI · Productos / Usuarios / Perfiles     │
+└───────────────────────────┬──────────────────────────────┘
+                            │ HTTP JSON (Bearer)
+┌───────────────────────────▼──────────────────────────────┐
+│  Laravel 11 · :8000                                        │
+│  Sanctum · middleware section · PDF/Excel · audit_logs     │
+│  Correo recuperación → Mailpit :8025                       │
+└───────────────┬──────────────────────────┬─────────────────┘
+                │                          │
+                ▼                          ▼
+┌───────────────────────────┐   ┌──────────────────────────┐
+│  MongoDB (tapterminal)     │   │  Mailpit (SMTP :1025)    │
+│  Host :27018 · Docker :27017│   │  UI :8025                │
+│  Mongo Express :8081       │   └──────────────────────────┘
+└───────────────────────────┘
 ```
+
+---
+
+## Referencias
+
+- Instalación y credenciales de prueba: [README.md](./README.md)
+- Colección Postman: `postman/TapTerminal.postman_collection.json`
