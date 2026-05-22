@@ -1,0 +1,27 @@
+<div class="auth-wrap">
+  <mat-card>
+    <mat-card-title>Tap Terminal</mat-card-title>
+    <mat-card-subtitle>Iniciar sesión</mat-card-subtitle>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Correo</mat-label>
+          <input matInput formControlName="username" type="email" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Contraseña</mat-label>
+          <input matInput formControlName="password" type="password" />
+        </mat-form-field>
+        @if (error) {
+          <p class="error">{{ error }}</p>
+        }
+        <button mat-flat-button color="primary" class="full" [disabled]="loading">
+          Entrar
+        </button>
+      </form>
+    </mat-card-content>
+    <mat-card-actions>
+      <a routerLink="/recuperar">Recuperar contraseña</a>
+    </mat-card-actions>
+  </mat-card>
+</div>

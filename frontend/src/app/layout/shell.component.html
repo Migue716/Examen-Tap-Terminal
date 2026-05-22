@@ -1,0 +1,28 @@
+<mat-sidenav-container class="shell">
+  <mat-sidenav mode="side" opened class="sidenav">
+    <div class="brand">Tap Terminal</div>
+    <mat-nav-list>
+      @if (auth.canRead('productos')) {
+        <a mat-list-item routerLink="/productos" routerLinkActive="active">Productos</a>
+      }
+      @if (auth.canRead('usuarios')) {
+        <a mat-list-item routerLink="/usuarios" routerLinkActive="active">Usuarios</a>
+      }
+      @if (auth.canRead('perfiles')) {
+        <a mat-list-item routerLink="/perfiles" routerLinkActive="active">Perfiles</a>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary">
+      <span>Área de Desarrollo</span>
+      <span class="spacer"></span>
+      <span class="user-name">{{ auth.user()?.name }}</span>
+      <button mat-button (click)="logout()">Cerrar sesión</button>
+    </mat-toolbar>
+    <main class="content">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

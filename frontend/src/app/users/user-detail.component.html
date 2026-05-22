@@ -1,0 +1,28 @@
+@if (user) {
+  <mat-card>
+    <mat-card-title>Detalle de usuario</mat-card-title>
+    <mat-card-content class="detail">
+      <img [src]="user.profile_photo" alt="Foto de perfil" class="photo" />
+      <div>
+        <p><strong>Usuario:</strong> {{ user.username }}</p>
+        <p><strong>Nombre:</strong> {{ user.name }}</p>
+        <p><strong>Teléfono:</strong> {{ user.phone || '—' }}</p>
+        <p><strong>Fecha creación:</strong> {{ user.created_at }}</p>
+      </div>
+    </mat-card-content>
+    <h3>Perfiles relacionados</h3>
+    <mat-list>
+      @for (profile of user.profiles ?? []; track profile.id) {
+        <mat-list-item>{{ profile.code }} — {{ profile.name }}</mat-list-item>
+      }
+    </mat-list>
+    <mat-card-actions>
+      <a mat-button routerLink="/usuarios">Volver</a>
+    </mat-card-actions>
+  </mat-card>
+}
+
+<style>
+  .detail { display: flex; gap: 24px; align-items: flex-start; }
+  .photo { width: 120px; height: 120px; border-radius: 8px; object-fit: cover; }
+</style>

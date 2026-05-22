@@ -1,0 +1,19 @@
+<mat-card>
+  <mat-card-title>{{ id ? 'Editar perfil' : 'Alta de perfil' }}</mat-card-title>
+  <mat-card-content>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline" class="full"><mat-label>Nombre</mat-label><input matInput formControlName="name" /></mat-form-field>
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Secciones</mat-label>
+        <mat-select formControlName="section_ids" multiple>
+          @for (s of sections; track s.id) {
+            <mat-option [value]="s.id">{{ s.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary">Guardar</button>
+      <a mat-button routerLink="/perfiles">Cancelar</a>
+    </form>
+  </mat-card-content>
+</mat-card>
+<style>.full{width:100%;display:block;margin-bottom:8px}</style>
