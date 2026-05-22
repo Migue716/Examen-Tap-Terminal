@@ -1,8 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
@@ -13,7 +16,16 @@ import { ProductViewDialogComponent } from './product-view-dialog.component';
 @Component({
   selector: 'app-products-list',
   standalone: true,
-  imports: [MatTableModule, MatButtonModule, MatIconModule, MatDialogModule, RouterLink],
+  imports: [
+    CurrencyPipe,
+    MatTableModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    MatTooltipModule,
+    MatDialogModule,
+    RouterLink,
+  ],
   templateUrl: './products-list.component.html',
 })
 export class ProductsListComponent implements OnInit {

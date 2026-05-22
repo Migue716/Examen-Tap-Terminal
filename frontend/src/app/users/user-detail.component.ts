@@ -3,13 +3,14 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
+import { MatIconModule } from '@angular/material/icon';
 import { ApiService } from '../core/api.service';
 import { AppUser } from '../core/models';
 
 @Component({
   selector: 'app-user-detail',
   standalone: true,
-  imports: [MatCardModule, MatButtonModule, MatListModule, RouterLink],
+  imports: [MatCardModule, MatButtonModule, MatListModule, MatIconModule, RouterLink],
   templateUrl: './user-detail.component.html',
 })
 export class UserDetailComponent implements OnInit {

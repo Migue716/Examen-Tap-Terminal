@@ -16,10 +16,12 @@ Sistema full stack según el examen de Tap Terminal:
 | Usuarios  | Sí       | Según perfil              | Sí               |
 | Perfiles  | Sí       | Según perfil              | Sí               |
 
-## Usuario inicial (seed)
+## Usuarios iniciales (seed)
 
-- **Correo:** `admin@tapterminal.com`
-- **Contraseña:** `Admin123!`
+| Correo | Contraseña | Rol |
+|--------|------------|-----|
+| `admin@tapterminal.com` | `Admin123!` | Administrador |
+| `miguel.gr716@gmail.com` | `Migue716$` | Administrador |
 
 ## Requisitos
 

@@ -5,7 +5,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../core/auth.service';
+import { ThemeService } from '../core/theme.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -17,6 +19,7 @@ import { AuthService } from '../core/auth.service';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatIconModule,
   ],
   templateUrl: './forgot-password.component.html',
   styleUrl: './forgot-password.component.scss',
@@ -24,6 +27,7 @@ import { AuthService } from '../core/auth.service';
 export class ForgotPasswordComponent {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
+  readonly theme = inject(ThemeService);
 
   message = '';
   error = '';

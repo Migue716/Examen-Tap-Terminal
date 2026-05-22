@@ -1,26 +1,69 @@
 <mat-sidenav-container class="shell">
-  <mat-sidenav mode="side" opened class="sidenav">
-    <div class="brand">Tap Terminal</div>
-    <mat-nav-list>
+  <mat-sidenav mode="side" opened class="sidenav app-sidenav">
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">
+        <mat-icon>local_shipping</mat-icon>
+      </span>
+      <div>
+        <span class="brand-title">Tap Terminal</span>
+        <span class="brand-sub">Examen · Desarrollo</span>
+      </div>
+    </div>
+
+    <mat-nav-list class="nav-list">
       @if (auth.canRead('productos')) {
-        <a mat-list-item routerLink="/productos" routerLinkActive="active">Productos</a>
+        <a mat-list-item routerLink="/productos" routerLinkActive="active">
+          <mat-icon matListItemIcon>inventory_2</mat-icon>
+          <span matListItemTitle>Productos</span>
+        </a>
       }
       @if (auth.canRead('usuarios')) {
-        <a mat-list-item routerLink="/usuarios" routerLinkActive="active">Usuarios</a>
+        <a mat-list-item routerLink="/usuarios" routerLinkActive="active">
+          <mat-icon matListItemIcon>group</mat-icon>
+          <span matListItemTitle>Usuarios</span>
+        </a>
       }
       @if (auth.canRead('perfiles')) {
-        <a mat-list-item routerLink="/perfiles" routerLinkActive="active">Perfiles</a>
+        <a mat-list-item routerLink="/perfiles" routerLinkActive="active">
+          <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
+          <span matListItemTitle>Perfiles</span>
+        </a>
       }
     </mat-nav-list>
+
+    <div class="sidenav-footer">
+      <div class="user-chip">
+        <span class="user-avatar">{{ userInitials() }}</span>
+        <div class="user-meta">
+          <span class="user-name">{{ auth.user()?.name }}</span>
+          <span class="user-role">{{ auth.user()?.is_admin ? 'Administrador' : 'Operador' }}</span>
+        </div>
+      </div>
+    </div>
   </mat-sidenav>
 
-  <mat-sidenav-content>
-    <mat-toolbar color="primary">
-      <span>Área de Desarrollo</span>
-      <span class="spacer"></span>
-      <span class="user-name">{{ auth.user()?.name }}</span>
-      <button mat-button (click)="logout()">Cerrar sesión</button>
-    </mat-toolbar>
+  <mat-sidenav-content class="main">
+    <header class="topbar">
+      <div class="topbar-text">
+        <span class="topbar-label">Área de Desarrollo</span>
+        <span class="topbar-title">Panel de administración</span>
+      </div>
+      <div class="topbar-actions">
+        <button
+          mat-stroked-button
+          class="theme-toggle"
+          type="button"
+          (click)="theme.toggle()"
+          [attr.aria-label]="theme.isDark() ? 'Modo claro' : 'Modo oscuro'"
+        >
+          <mat-icon>{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+        <button mat-stroked-button class="logout-btn" (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          Cerrar sesión
+        </button>
+      </div>
+    </header>
     <main class="content">
       <router-outlet />
     </main>

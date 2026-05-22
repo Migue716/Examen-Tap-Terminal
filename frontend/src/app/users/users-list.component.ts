@@ -3,6 +3,8 @@ import { Router, RouterLink } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
 import { AppUser } from '../core/models';
@@ -11,7 +13,7 @@ import { downloadBlob } from '../core/download.util';
 @Component({
   selector: 'app-users-list',
   standalone: true,
-  imports: [MatTableModule, MatButtonModule, MatIconModule, RouterLink],
+  imports: [MatTableModule, MatButtonModule, MatIconModule, MatCardModule, MatTooltipModule, RouterLink],
   templateUrl: './users-list.component.html',
 })
 export class UsersListComponent implements OnInit {

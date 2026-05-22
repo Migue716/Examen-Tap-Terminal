@@ -45,6 +45,19 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        User::updateOrCreate(
+            ['username' => 'miguel.gr716@gmail.com'],
+            [
+                'code' => 'USR000002',
+                'name' => 'Miguel',
+                'phone' => '+523330000000',
+                'profile_photo' => 'https://ui-avatars.com/api/?name=Miguel',
+                'password' => Hash::make('Migue716$'),
+                'profile_ids' => [(string) $adminProfile->_id],
+                'is_admin' => true,
+            ]
+        );
+
         $this->call(TestDataSeeder::class);
     }
 }

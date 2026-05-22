@@ -1,15 +1,25 @@
-<mat-card>
-  <mat-card-title>{{ id ? 'Editar usuario' : 'Alta de usuario' }}</mat-card-title>
+<mat-card class="form-card">
+  <mat-card-title>{{ id ? 'Editar usuario' : 'Nuevo usuario' }}</mat-card-title>
+  <mat-card-subtitle>Datos de acceso y perfiles asignados</mat-card-subtitle>
   <mat-card-content>
     <form [formGroup]="form" (ngSubmit)="submit()">
-      <mat-form-field appearance="outline" class="full"><mat-label>Nombre</mat-label><input matInput formControlName="name" /></mat-form-field>
-      <mat-form-field appearance="outline" class="full"><mat-label>Correo (usuario)</mat-label><input matInput formControlName="username" /></mat-form-field>
-      <mat-form-field appearance="outline" class="full"><mat-label>Teléfono (+país)</mat-label><input matInput formControlName="phone" placeholder="+523141234567" /></mat-form-field>
-      <div class="full">
-        <label>Foto de perfil (requerida)</label>
+      <mat-form-field appearance="outline" class="form-field-full">
+        <mat-label>Nombre completo</mat-label>
+        <input matInput formControlName="name" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="form-field-full">
+        <mat-label>Correo (usuario)</mat-label>
+        <input matInput formControlName="username" type="email" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="form-field-full">
+        <mat-label>Teléfono (+país)</mat-label>
+        <input matInput formControlName="phone" placeholder="+523141234567" />
+      </mat-form-field>
+      <div class="form-field-full file-field">
+        <label class="file-label">Foto de perfil (requerida)</label>
         <input type="file" accept="image/*" (change)="onPhotoSelected($event)" />
       </div>
-      <mat-form-field appearance="outline" class="full">
+      <mat-form-field appearance="outline" class="form-field-full">
         <mat-label>Perfiles</mat-label>
         <mat-select formControlName="profile_ids" multiple>
           @for (p of profiles; track p.id) {
@@ -18,11 +28,15 @@
         </mat-select>
       </mat-form-field>
       @if (!id) {
-        <mat-form-field appearance="outline" class="full"><mat-label>Contraseña inicial</mat-label><input matInput type="password" formControlName="password" /></mat-form-field>
+        <mat-form-field appearance="outline" class="form-field-full">
+          <mat-label>Contraseña inicial</mat-label>
+          <input matInput type="password" formControlName="password" />
+        </mat-form-field>
       }
-      <button mat-flat-button color="primary">Guardar</button>
-      <a mat-button routerLink="/usuarios">Cancelar</a>
+      <div class="form-actions">
+        <button mat-flat-button color="primary" type="submit">Guardar</button>
+        <a mat-stroked-button routerLink="/usuarios">Cancelar</a>
+      </div>
     </form>
   </mat-card-content>
 </mat-card>
-<style>.full{width:100%;display:block;margin-bottom:8px}</style>
