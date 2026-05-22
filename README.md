@@ -7,37 +7,64 @@ Sistema full stack según el examen de Tap Terminal:
 - **Auth:** Laravel Sanctum (Bearer token)
 - **Exportaciones:** PDF (DomPDF) y Excel (Maatwebsite)
 - **Bitácora:** colección `audit_logs` con datos anteriores y actuales
+- **Correo (dev):** Mailpit (binario nativo o Docker)
 
-Ver **[ARCHITECTURE.md](./ARCHITECTURE.md)** para diagramas de despliegue, capas, autenticación y modelo de datos.
+Documentación de arquitectura: **[ARCHITECTURE.md](./ARCHITECTURE.md)**
 
-## Módulos
+---
 
-| Módulo    | Consulta | Alta/Edición/Eliminación | Export PDF/Excel |
-|-----------|----------|---------------------------|------------------|
-| Productos | Sí       | Según perfil              | Sí               |
-| Usuarios  | Sí       | Según perfil              | Sí               |
-| Perfiles  | Sí       | Según perfil              | Sí               |
+## Arrancar el proyecto (local)
 
-## Usuarios iniciales (seed)
+Requisitos: **PHP 8.2** (ext. `mongodb`), **Composer**, **MongoDB** en `127.0.0.1:27017`, **Node.js 22**.
 
-| Correo | Contraseña | Rol |
-|--------|------------|-----|
-| `admin@tapterminal.com` | `Admin123!` | Administrador |
-| `miguel.gr716@gmail.com` | `Migue716$` | Administrador |
-| `usuario01@tapterminal.com` … `usuario20@tapterminal.com` | `Test123!` | Según perfil |
+Abre **3 terminales** en la raíz del proyecto:
 
-Si el login devuelve `401` tras **recuperar contraseña**, ejecuta `php artisan db:seed --force` o revisa el correo en el log / Mailpit.
+### Terminal 1 — Mailpit
 
-## Requisitos (desarrollo local)
+```powershell
+.\scripts\start-mailpit.ps1
+```
 
-- PHP 8.2 + extensión `mongodb`
-- Composer
-- MongoDB Server (puerto **27017**)
-- Node.js 22
+- Primera ejecución: descarga `mailpit.exe` en `tools/mailpit/`
+- UI: http://localhost:8025
+- Deja esta terminal abierta
 
-## Ejecución local (recomendado)
+Alternativa con Docker: `docker compose up -d mailpit`
 
-### 1. Instalar dependencias (Windows)
+### Terminal 2 — Backend
+
+```powershell
+cd backend
+php artisan serve
+```
+
+- API: http://localhost:8000
+- Swagger: http://localhost:8000/api/documentation
+
+### Terminal 3 — Frontend
+
+```powershell
+cd frontend
+npm start
+```
+
+- App: http://localhost:4200
+
+### URLs
+
+| Servicio | URL |
+|----------|-----|
+| Aplicación | http://localhost:4200 |
+| API | http://localhost:8000 |
+| Swagger | http://localhost:8000/api/documentation |
+| Mailpit | http://localhost:8025 |
+| MongoDB (Compass) | `mongodb://127.0.0.1:27017/tapterminal` |
+
+---
+
+## Primera instalación
+
+### Windows (automático)
 
 ```powershell
 winget install PHP.PHP.8.2 MongoDB.Server
@@ -45,125 +72,123 @@ winget install PHP.PHP.8.2 MongoDB.Server
 .\scripts\setup-windows.ps1
 ```
 
-El script configura PHP, Composer, crea `backend/.env` y ejecuta el seed.
-
-### 2. Iniciar servicios
-
-**Terminal 1 — API:**
-
-```bash
-cd backend
-composer install
-cp .env.example .env   # si no existe
-php artisan key:generate
-php artisan db:seed
-php artisan serve
-```
-
-**Terminal 2 — Frontend:**
-
-```bash
-cd frontend
-npm install
-npm start
-```
-
-Antes de iniciar el backend, levanta **Mailpit** (correos de recuperar contraseña):
-
-**Sin Docker** — binario nativo (Windows):
+### Manual
 
 ```powershell
-.\scripts\start-mailpit.ps1
+cd backend
+composer install
+copy .env.example .env
+php artisan key:generate
+php artisan db:seed
 ```
 
-La primera vez descarga `mailpit.exe` en `tools/mailpit/`. UI: http://localhost:8025
-
-**Con Docker:**
-
-```bash
-docker compose up -d mailpit
+```powershell
+cd frontend
+npm install
 ```
 
-O ejecuta `.\scripts\start-local.ps1` para ver todos los comandos.
+Guía de comandos: `.\scripts\start-local.ps1`
 
-### 3. Abrir
+---
 
-| Servicio | URL |
-|----------|-----|
-| App | http://localhost:4200 |
-| API | http://localhost:8000 |
-| Swagger | http://localhost:8000/api/documentation |
-| **Mailpit** (correos) | http://localhost:8025 |
+## Usuarios de prueba (seed)
 
-### Configuración local (`backend/.env`)
+| Correo | Contraseña | Rol |
+|--------|------------|-----|
+| `admin@tapterminal.com` | `Admin123!` | Administrador |
+| `miguel.gr716@gmail.com` | `Migue716$` | Administrador |
+| `usuario01@tapterminal.com` … `usuario20@…` | `Test123!` | Según perfil |
+
+Restaurar contraseñas tras recuperar acceso:
+
+```powershell
+cd backend
+php artisan db:seed --force
+```
+
+O revisa la contraseña temporal en http://localhost:8025 (Mailpit).
+
+---
+
+## Configuración (`backend/.env`)
 
 ```env
 MONGODB_URI=mongodb://127.0.0.1:27017
 MONGODB_DATABASE=tapterminal
+
 MAIL_MAILER=smtp
 MAIL_HOST=127.0.0.1
 MAIL_PORT=1025
+MAIL_FROM_ADDRESS=noreply@tapterminal.com
 ```
 
-- **MongoDB Compass:** `mongodb://127.0.0.1:27017/tapterminal`
-- **Recuperar contraseña:** revisa el correo HTML en http://localhost:8025
+Sin Mailpit: `MAIL_MAILER=log` (correos en `backend/storage/logs/laravel.log`).
 
-### Seed en local
+Referencia Docker: `backend/.env.docker.example`
 
-```bash
-cd backend
-php artisan db:seed --force
-```
+---
+
+## Scripts útiles
+
+| Script | Descripción |
+|--------|-------------|
+| `scripts/setup-windows.ps1` | PHP, Composer, `.env`, seed |
+| `scripts/start-mailpit.ps1` | Mailpit **sin Docker** |
+| `scripts/start-local.ps1` | Resumen de comandos locales |
+
+---
+
+## Módulos
+
+| Módulo | Consulta | Alta/Edición/Eliminación | Export PDF/Excel |
+|--------|----------|---------------------------|------------------|
+| Productos | Sí | Según perfil | Sí |
+| Usuarios | Sí | Según perfil | Sí |
+| Perfiles | Sí | Según perfil | Sí |
+
+---
+
+## MongoDB y Compass
+
+- **Proyecto local:** `mongodb://127.0.0.1:27017/tapterminal`
+- Si Compass en **27017** no muestra `tapterminal`, puede que estés viendo otro Mongo instalado en Windows.
+- **Mongo Express** (solo Docker): http://localhost:8081 — `admin` / `tapterminal`
 
 ---
 
 ## Ejecución con Docker (opcional)
 
-1. Iniciar Docker Desktop.
-2. En la raíz del proyecto:
-
 ```bash
 docker compose up --build
-```
-
-3. Seed:
-
-```bash
 docker compose exec backend php artisan db:seed --force
 ```
 
-4. URLs extra:
-
 | Servicio | URL |
 |----------|-----|
+| Frontend | http://localhost:4200 |
+| API | http://localhost:8000 |
 | Mailpit | http://localhost:8025 |
-| Mongo Express | http://localhost:8081 (`admin` / `tapterminal`) |
+| Mongo Express | http://localhost:8081 |
 
-En Docker, el backend usa variables del `docker-compose.yml` (`mongodb://mongodb:27017`, SMTP → Mailpit).  
-Mongo del contenedor se publica en el host en el puerto **27018** (para no chocar con Mongo local en 27017):
+Mongo del contenedor en el host (si tienes Mongo local en 27017):
 
 ```
 mongodb://127.0.0.1:27018/tapterminal
 ```
 
-Referencia: `backend/.env.docker.example`
-
-### Correo en Docker (Mailpit)
-
-```bash
-docker compose restart backend
-```
+Tras cambiar correo en Docker: `docker compose restart backend`
 
 ---
 
 ## Documentación API
 
-### Swagger UI
+### Swagger
 
-**http://localhost:8000/api/documentation**
+1. Abre http://localhost:8000/api/documentation
+2. `POST /auth/login` → copia el `token`
+3. **Authorize** → `Bearer {token}`
 
-1. `POST /auth/login` → copiar `token`
-2. **Authorize** → `Bearer {token}`
+Regenerar docs:
 
 ```bash
 cd backend
@@ -174,12 +199,14 @@ php artisan l5-swagger:generate
 
 `postman/TapTerminal.postman_collection.json`
 
+---
+
 ## Criterios del examen cubiertos
 
 - Códigos automáticos (PRD, USR, PFL)
 - Fechas `DD/MM/YYYY HH:MM`
 - Precio máximo 3 dígitos (0–999)
 - Contraseñas cifradas (`Hash::make`)
-- Recuperación de contraseña por correo
+- Recuperación de contraseña por correo (HTML + Mailpit)
 - Acceso por secciones según perfiles
 - Bitácora en create/update/delete
