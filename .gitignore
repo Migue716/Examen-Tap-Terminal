@@ -3,3 +3,4 @@ backend/vendor
 backend/.env
 frontend/node_modules
 frontend/dist
+tools/mailpit/

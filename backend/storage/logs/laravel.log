@@ -1427,3 +1427,27 @@ Contraseña: 0jfjNtkON8
 #9 /var/www/html/artisan(16): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
 #10 {main}
 "} 
+[2026-05-22 16:22:27] laravel.EMERGENCY: Unable to create configured logger. Using emergency logger. {"exception":"[object] (InvalidArgumentException(code: 0): Log [] is not defined. at C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Log/LogManager.php:232)
+[stacktrace]
+#0 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(139): Illuminate/Log/LogManager->resolve('', NULL)
+#1 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(126): Illuminate/Log/LogManager->get('')
+#2 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(701): Illuminate/Log/LogManager->driver()
+#3 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(380): Illuminate/Log/LogManager->error('Class \"L5Swagge...', Array)
+#4 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(343): Illuminate/Foundation/Exceptions/Handler->reportThrowable(Object(Error))
+#5 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(621): Illuminate/Foundation/Exceptions/Handler->report(Object(Error))
+#6 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(200): Illuminate/Foundation/Console/Kernel->reportException(Object(Error))
+#7 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/artisan(16): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#8 {main}
+"} 
+[2026-05-22 16:22:27] laravel.ERROR: Class "L5Swagger\Generator" not found {"exception":"[object] (Error(code: 0): Class \"L5Swagger\\Generator\" not found at C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/config/l5-swagger.php:58)
+[stacktrace]
+#0 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/LoadConfiguration.php(97): require()
+#1 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/LoadConfiguration.php(97): Illuminate/Foundation/Bootstrap/LoadConfiguration->Illuminate/Foundation/Bootstrap/{closure}()
+#2 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/LoadConfiguration.php(78): Illuminate/Foundation/Bootstrap/LoadConfiguration->loadConfigurationFile(Object(Illuminate/Config/Repository), 'l5-swagger', 'C://Users//migue//...', Array)
+#3 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/LoadConfiguration.php(39): Illuminate/Foundation/Bootstrap/LoadConfiguration->loadConfigurationFiles(Object(Illuminate/Foundation/Application), Object(Illuminate/Config/Repository))
+#4 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(342): Illuminate/Foundation/Bootstrap/LoadConfiguration->bootstrap(Object(Illuminate/Foundation/Application))
+#5 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(474): Illuminate/Foundation/Application->bootstrapWith(Array)
+#6 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(196): Illuminate/Foundation/Console/Kernel->bootstrap()
+#7 C:/Users/migue/Documents/GitHub/Examen Tap Terminal/backend/artisan(16): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#8 {main}
+"} 

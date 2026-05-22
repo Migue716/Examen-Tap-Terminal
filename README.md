@@ -26,48 +26,98 @@ Ver **[ARCHITECTURE.md](./ARCHITECTURE.md)** para diagramas de despliegue, capas
 | `miguel.gr716@gmail.com` | `Migue716$` | Administrador |
 | `usuario01@tapterminal.com` … `usuario20@tapterminal.com` | `Test123!` | Según perfil |
 
-Si **Swagger o el login** responden `401 Credenciales inválidas` después de probar recuperar contraseña, la clave ya fue reemplazada por una temporal. Restaura los valores del seed:
+Si el login devuelve `401` tras **recuperar contraseña**, ejecuta `php artisan db:seed --force` o revisa el correo en el log / Mailpit.
 
-```bash
-docker compose exec backend php artisan db:seed --force
-```
+## Requisitos (desarrollo local)
 
-O usa la contraseña temporal en Mailpit: http://localhost:8025
+- PHP 8.2 + extensión `mongodb`
+- Composer
+- MongoDB Server (puerto **27017**)
+- Node.js 22
 
-### Compass muestra otra base (Mongo “local” en vez de Docker)
+## Ejecución local (recomendado)
 
-Si tienes **MongoDB instalado en Windows**, usa el puerto **27017** y Compass se conecta a ese, no al de Docker.
-
-El proyecto publica Mongo de Docker en el puerto **27018**:
-
-```
-mongodb://127.0.0.1:27018/tapterminal
-```
-
-En Compass: host `127.0.0.1`, puerto **27018**.  
-Mongo Express (http://localhost:8081) siempre apunta al contenedor correcto.
-
-Alternativa: detener el servicio local `MongoDB Server` en Windows y usar solo Docker.
-
-## Requisitos
-
-- Docker Desktop (recomendado), o PHP 8.2 + Composer + MongoDB + Node 22
-
-## Instalación en Windows (sin Docker)
-
-Con **winget** (PowerShell como administrador opcional):
+### 1. Instalar dependencias (Windows)
 
 ```powershell
 winget install PHP.PHP.8.2 MongoDB.Server
+# Cierra y abre la terminal, luego:
+.\scripts\setup-windows.ps1
 ```
 
-Luego instala Composer y la extensión MongoDB para PHP (ver `scripts/setup-windows.ps1`) o sigue manualmente:
+El script configura PHP, Composer, crea `backend/.env` y ejecuta el seed.
 
-1. Cierra y abre una terminal nueva para refrescar el PATH.
-2. Ejecuta `scripts/setup-windows.ps1` desde la raíz del proyecto.
-3. Sigue los pasos de **Ejecución local** más abajo.
+### 2. Iniciar servicios
 
-## Ejecución con Docker
+**Terminal 1 — API:**
+
+```bash
+cd backend
+composer install
+cp .env.example .env   # si no existe
+php artisan key:generate
+php artisan db:seed
+php artisan serve
+```
+
+**Terminal 2 — Frontend:**
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+Antes de iniciar el backend, levanta **Mailpit** (correos de recuperar contraseña):
+
+**Sin Docker** — binario nativo (Windows):
+
+```powershell
+.\scripts\start-mailpit.ps1
+```
+
+La primera vez descarga `mailpit.exe` en `tools/mailpit/`. UI: http://localhost:8025
+
+**Con Docker:**
+
+```bash
+docker compose up -d mailpit
+```
+
+O ejecuta `.\scripts\start-local.ps1` para ver todos los comandos.
+
+### 3. Abrir
+
+| Servicio | URL |
+|----------|-----|
+| App | http://localhost:4200 |
+| API | http://localhost:8000 |
+| Swagger | http://localhost:8000/api/documentation |
+| **Mailpit** (correos) | http://localhost:8025 |
+
+### Configuración local (`backend/.env`)
+
+```env
+MONGODB_URI=mongodb://127.0.0.1:27017
+MONGODB_DATABASE=tapterminal
+MAIL_MAILER=smtp
+MAIL_HOST=127.0.0.1
+MAIL_PORT=1025
+```
+
+- **MongoDB Compass:** `mongodb://127.0.0.1:27017/tapterminal`
+- **Recuperar contraseña:** revisa el correo HTML en http://localhost:8025
+
+### Seed en local
+
+```bash
+cd backend
+php artisan db:seed --force
+```
+
+---
+
+## Ejecución con Docker (opcional)
 
 1. Iniciar Docker Desktop.
 2. En la raíz del proyecto:
@@ -76,67 +126,44 @@ Luego instala Composer y la extensión MongoDB para PHP (ver `scripts/setup-wind
 docker compose up --build
 ```
 
-3. En otra terminal, dentro del contenedor backend (o con PHP local):
+3. Seed:
 
 ```bash
-docker compose exec backend composer install
-docker compose exec backend cp .env.example .env
-docker compose exec backend php artisan key:generate
-docker compose exec backend php artisan db:seed
+docker compose exec backend php artisan db:seed --force
 ```
 
-4. Abrir:
+4. URLs extra:
 
-- Frontend: http://localhost:4200
-- API: http://localhost:8000
-- **Mailpit** (correos de recuperar contraseña): http://localhost:8025
-- **Mongo Express** (UI web de MongoDB): http://localhost:8081 — usuario `admin` / contraseña `tapterminal`
+| Servicio | URL |
+|----------|-----|
+| Mailpit | http://localhost:8025 |
+| Mongo Express | http://localhost:8081 (`admin` / `tapterminal`) |
 
-### Correo no llega a Mailpit
+En Docker, el backend usa variables del `docker-compose.yml` (`mongodb://mongodb:27017`, SMTP → Mailpit).  
+Mongo del contenedor se publica en el host en el puerto **27018** (para no chocar con Mongo local en 27017):
 
-1. Verifica que Mailpit esté arriba: `docker compose ps` (servicio `mailpit`).
-2. En `backend/.env` debe ser `MAIL_MAILER=smtp`, `MAIL_HOST=mailpit`, `MAIL_PORT=1025` (o usa las variables del `docker-compose.yml`).
-3. **Reinicia el backend** tras cambiar correo (el servidor PHP cachea la config):
-   ```bash
-   docker compose restart backend
-   ```
-4. Si antes tenías `MAIL_MAILER=log`, los correos solo se escribían en `backend/storage/logs/laravel.log`.
+```
+mongodb://127.0.0.1:27018/tapterminal
+```
 
-## Ejecución local (sin Docker)
+Referencia: `backend/.env.docker.example`
 
-### Backend
+### Correo en Docker (Mailpit)
 
 ```bash
-cd backend
-composer install
-cp .env.example .env
-php artisan key:generate
-# Configurar MONGODB_URI en .env
-php artisan db:seed
-php artisan serve
+docker compose restart backend
 ```
 
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm start
-```
+---
 
 ## Documentación API
 
 ### Swagger UI
 
-Con el backend en marcha, abre:
-
 **http://localhost:8000/api/documentation**
 
-1. Ejecuta `POST /auth/login` y copia el `token`.
-2. Pulsa **Authorize** e ingresa: `Bearer {tu_token}`.
-3. Prueba el resto de endpoints.
-
-Regenerar documentación:
+1. `POST /auth/login` → copiar `token`
+2. **Authorize** → `Bearer {token}`
 
 ```bash
 cd backend
@@ -145,7 +172,7 @@ php artisan l5-swagger:generate
 
 ### Postman
 
-Colección en `postman/TapTerminal.postman_collection.json`.
+`postman/TapTerminal.postman_collection.json`
 
 ## Criterios del examen cubiertos
 

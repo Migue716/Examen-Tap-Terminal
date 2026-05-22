@@ -67,8 +67,12 @@ class AuthController extends Controller
             ], 503);
         }
 
+        $hint = config('mail.default') === 'log'
+            ? 'Revisa la contraseña en backend/storage/logs/laravel.log'
+            : 'En desarrollo revísalas en Mailpit: http://localhost:8025';
+
         return response()->json([
-            'message' => 'Se enviaron las credenciales temporales al correo registrado. En desarrollo revísalas en Mailpit: http://localhost:8025',
+            'message' => "Se enviaron las credenciales temporales al correo registrado. {$hint}",
         ]);
     }
 

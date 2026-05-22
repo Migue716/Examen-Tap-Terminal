@@ -45,6 +45,11 @@ php artisan db:seed --force
 Pop-Location
 
 Write-Host ""
-Write-Host "Listo. Inicia el backend:  cd backend && php artisan serve"
-Write-Host "Inicia el frontend: cd frontend && npm install && npm start"
+Write-Host "Listo (modo local)." -ForegroundColor Green
+Write-Host "MongoDB: mongodb://127.0.0.1:27017/tapterminal"
+Write-Host "Mailpit: docker compose up -d mailpit  →  http://localhost:8025"
+Write-Host ""
+Write-Host "Terminal 1: cd backend  ;  php artisan serve"
+Write-Host "Terminal 2: cd frontend ;  npm install ;  npm start"
+Write-Host "App: http://localhost:4200  |  API: http://localhost:8000"
 Write-Host "Login: admin@tapterminal.com / Admin123!"
