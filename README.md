@@ -22,6 +22,15 @@ Sistema full stack según el examen de Tap Terminal:
 |--------|------------|-----|
 | `admin@tapterminal.com` | `Admin123!` | Administrador |
 | `miguel.gr716@gmail.com` | `Migue716$` | Administrador |
+| `usuario01@tapterminal.com` … `usuario20@tapterminal.com` | `Test123!` | Según perfil |
+
+Si **Swagger o el login** responden `401 Credenciales inválidas` después de probar recuperar contraseña, la clave ya fue reemplazada por una temporal. Restaura los valores del seed:
+
+```bash
+docker compose exec backend php artisan db:seed --force
+```
+
+O usa la contraseña temporal en Mailpit: http://localhost:8025
 
 ## Requisitos
 

@@ -7,7 +7,19 @@ use OpenApi\Attributes as OA;
 #[OA\Info(
     version: '1.0.0',
     title: 'Tap Terminal API',
-    description: 'API REST - Examen de Admisión Área de Desarrollo. Autenticación Bearer (Sanctum).'
+    description: <<<'DESC'
+API REST - Examen de Admisión Área de Desarrollo. Autenticación Bearer (Sanctum).
+
+**Credenciales vigentes (tras `php artisan db:seed`):**
+| Usuario | Contraseña |
+|---------|------------|
+| admin@tapterminal.com | Admin123! |
+| miguel.gr716@gmail.com | Migue716$ |
+
+Usuarios de prueba `usuario01@…` … `usuario20@…`: contraseña `Test123!`.
+
+Si el login devuelve 401 tras usar **Recuperar contraseña**, la clave del usuario ya no es la del seed: revisa Mailpit (http://localhost:8025) o ejecuta de nuevo `php artisan db:seed`.
+DESC
 )]
 #[OA\Server(url: 'http://localhost:8000/api', description: 'Local / Docker')]
 #[OA\SecurityScheme(
