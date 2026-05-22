@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Mail\PasswordResetMail;
 use App\Models\User;
-use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -51,16 +51,25 @@ class AuthController extends Controller
             return response()->json(['message' => 'El usuario no existe en el sistema.'], 404);
         }
 
-        $newPassword = Str::password(10, symbols: false);
+        $newPassword = Str::password(12, letters: true, numbers: true, symbols: true);
 
         $user->update(['password' => Hash::make($newPassword)]);
 
-        Mail::raw(
-            "Sus credenciales temporales Tap Terminal:\nUsuario: {$user->username}\nContraseña: {$newPassword}",
-            fn ($message) => $message->to($user->username)->subject('Recuperación de contraseña - Tap Terminal')
-        );
+        try {
+            Mail::to($user->username)->send(
+                new PasswordResetMail($user->name, $user->username, $newPassword)
+            );
+        } catch (\Throwable $e) {
+            report($e);
 
-        return response()->json(['message' => 'Se enviaron las credenciales al correo registrado.']);
+            return response()->json([
+                'message' => 'No se pudo enviar el correo. En Docker usa Mailpit (http://localhost:8025) y reinicia el backend.',
+            ], 503);
+        }
+
+        return response()->json([
+            'message' => 'Se enviaron las credenciales temporales al correo registrado. En desarrollo revísalas en Mailpit: http://localhost:8025',
+        ]);
     }
 
     private function authUserPayload(User $user): array

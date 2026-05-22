@@ -6,6 +6,12 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
   backend:
     build:
       context: ./backend
@@ -18,11 +24,20 @@ services:
       MONGODB_URI: mongodb://mongodb:27017
       MONGODB_DATABASE: tapterminal
       FRONTEND_URL: http://localhost:4200
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_USERNAME: null
+      MAIL_PASSWORD: null
+      MAIL_ENCRYPTION: null
+      MAIL_FROM_ADDRESS: noreply@tapterminal.com
+      MAIL_FROM_NAME: Tap Terminal
     volumes:
       - ./backend:/var/www/html
       - backend_vendor:/var/www/html/vendor
     depends_on:
       - mongodb
+      - mailpit
     command: php artisan serve --host=0.0.0.0 --port=8000
 
   frontend:

@@ -74,6 +74,17 @@ docker compose exec backend php artisan db:seed
 
 - Frontend: http://localhost:4200
 - API: http://localhost:8000
+- **Mailpit** (correos de recuperar contraseña): http://localhost:8025
+
+### Correo no llega a Mailpit
+
+1. Verifica que Mailpit esté arriba: `docker compose ps` (servicio `mailpit`).
+2. En `backend/.env` debe ser `MAIL_MAILER=smtp`, `MAIL_HOST=mailpit`, `MAIL_PORT=1025` (o usa las variables del `docker-compose.yml`).
+3. **Reinicia el backend** tras cambiar correo (el servidor PHP cachea la config):
+   ```bash
+   docker compose restart backend
+   ```
+4. Si antes tenías `MAIL_MAILER=log`, los correos solo se escribían en `backend/storage/logs/laravel.log`.
 
 ## Ejecución local (sin Docker)
 
